@@ -15,11 +15,11 @@ const initializeExpressServer = async () => {
 
     if (process.env.NODE_ENV === "production") {
         console.log("up here prod");
-        app.use(express.static(path.join(__dirname, "frontend/dist")));
+        app.use(express.static(path.join(__dirname, "/frontend/dist")));
 
         app.get("*", (req, res) =>
             res.sendFile(
-                path.resolve(__dirname, "frontend", "dist", "index.html")
+                path.resolve(__dirname, "/", "frontend", "dist", "index.html")
             )
         );
     } else {
