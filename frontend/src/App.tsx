@@ -1,17 +1,16 @@
 import React from 'react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
-import Analysis from './pages/Analysis'
 import Aos from 'aos'
 
 import './index.css'
 import 'aos/dist/aos.css'
 
-function App() {
+const App = () => {
   return (
     <>
       <Router>
-        <div className="h-screen bg-gray-100 px-7 pt-4 font-rubik text-[0.9rem] leading-[1.35rem] text-gray-900 dark:bg-gray-900 dark:text-gray-200">
+        <div className="h-screen bg-gray-100 px-7 pt-4 font-[rubik] text-[0.9rem] leading-[1.35rem] text-gray-900 dark:bg-gray-900 dark:text-gray-200">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route
