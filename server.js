@@ -2,6 +2,7 @@ import express from "express";
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
 import dotenv from "dotenv";
+import apiRouter from "api/router.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
