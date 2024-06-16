@@ -3,7 +3,7 @@ import axios from 'axios'
 import { ClipLoader } from 'react-spinners'
 import { BsCamera } from 'react-icons/bs'
 import { IoIosOptions } from 'react-icons/io'
-import { IoSendSharp, IoCloseSharp } from 'react-icons/io5'
+import { IoSendSharp, IoCloseSharp, IoChevronDown } from 'react-icons/io5'
 import {
   FaArrowLeftLong,
   FaArrowRightLong,
@@ -11,6 +11,7 @@ import {
   FaChevronRight
 } from 'react-icons/fa6'
 import localData from 'cache'
+import { capitalizeString } from 'utils'
 interface FormData {
   allergies: string
   dietGoal: string
@@ -80,8 +81,8 @@ const FOOD_DELIVERY_SERVICES = [
 ]
 
 const Home = () => {
-  const [sideMenuIsVisible, setSideMenuIsVisible] = useState<boolean>(true)
-  const [isFetchingResponse, setIsFetchingResponse] = useState<boolean>(false)
+  const [sideMenuIsVisible, setSideMenuIsVisible] = useState(true)
+  const [isFetchingResponse, setIsFetchingResponse] = useState(false)
   const [latestAIResponse, setLatestAIResponse] = useState<AIResponse | null>(
     null
   )
@@ -94,7 +95,9 @@ const Home = () => {
   )
   const [currentAlternativeIndex, setCurrentAlternativeIndex] =
     useState<number>(0)
-    const [rememberData, setRememberData] = useState<boolean>(false)
+  const [rememberData, setRememberData] = useState(false)
+  const [fitnessLevelDropdownOpen, setFitnessLevelDropdownOpen] =
+    useState(false)
   const [formData, setFormData] = useState<FormData>({
     allergies: '',
     dietGoal: '',
@@ -291,6 +294,11 @@ const Home = () => {
     } else {
       localStorage.removeItem('formData')
     }
+  }
+
+  const handleFitnessLevelChange = (level: string) => {
+    setFormData({ ...formData, fitnessLevel: level })
+    setFitnessLevelDropdownOpen(false)
   }
 
   return (
