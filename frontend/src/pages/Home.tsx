@@ -3,7 +3,7 @@ import axios from 'axios'
 import { ClipLoader } from 'react-spinners'
 import { BsCamera } from 'react-icons/bs'
 import { IoIosOptions } from 'react-icons/io'
-import { IoSendSharp } from 'react-icons/io5'
+import { IoSendSharp, IoCloseSharp } from 'react-icons/io5'
 import {
   FaArrowLeftLong,
   FaArrowRightLong,
@@ -613,7 +613,21 @@ const Home = () => {
       </div>
 
       {/* Side menu */}
-      <div></div>
+      <div
+        className={`flex flex-col justify-center fixed right-0 top-0 h-screen w-1/3 border-l-2 border-l-gray-700 shadow-black/30 px-6 shadow-lg transition-transform duration-300 dark:bg-gray-900 ${
+          sideMenuIsVisible ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={() => setSideMenuIsVisible(false)}
+            className="rounded-full p-2 transition-colors ease-in-out dark:hover:bg-gray-800"
+          >
+            <IoCloseSharp size={24} className="text-teal-500" />
+          </button>
+        </div>
+        <div className="px-4"></div>
+      </div>
     </div>
   )
 }
