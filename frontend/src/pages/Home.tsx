@@ -1,8 +1,15 @@
 import React, { useState } from 'react'
+import axios from 'axios'
 import { ClipLoader } from 'react-spinners'
 import { BsCamera } from 'react-icons/bs'
 import { IoIosOptions } from 'react-icons/io'
 import { IoSendSharp } from 'react-icons/io5'
+import {
+  FaArrowLeftLong,
+  FaArrowRightLong,
+  FaChevronDown,
+  FaChevronRight
+} from 'react-icons/fa6'
 import localData from 'cache'
 interface FormData {
   allergies: string
@@ -14,11 +21,63 @@ interface FormData {
   meal: string
 }
 
+interface Alternative {
+  name: string
+  ingredients: { isOpen: boolean; content: string[] }
+  recipe: { isOpen: boolean; content: string[] }
+  comparison: { isOpen: boolean; content: string }
+}
+
+interface AlternativeInfo {
+  name: string
+  ingredients: string[]
+  recipe: string[]
+  comparison: string[]
+}
+
 interface AIResponse {
   overview: string
   alternatives: Alternative[]
 }
 
+const FOOD_DELIVERY_SERVICES = [
+  {
+    id: 1,
+    label: 'Chowdeck',
+    link: 'https://chowdeck.com',
+    logo: '/images/chowdeck-logo.png'
+  },
+  {
+    id: 2,
+    label: 'Doordash',
+    link: 'https://doordash.com',
+    logo: '/images/doordash-logo.png'
+  },
+  {
+    id: 3,
+    label: 'Glovo',
+    link: 'https://glovoapp.com',
+    logo: '/images/glovo-logo.png'
+  },
+  {
+    id: 4,
+    label: 'Jumia',
+    link: 'https://jumia.com.ng',
+    logo: '/images/jumia-foods-logo.png'
+  },
+  {
+    id: 5,
+    label: 'Uber Eats',
+    link: 'https://ubereats.com',
+    logo: '/images/uber-eats-logo.png'
+  },
+  {
+    id: 6,
+    label: 'Zomato',
+    link: 'https://zomato.com/india',
+    logo: '/images/zomato-logo.png'
+  }
+]
 
 const Home = () => {
   const [sideMenuIsVisible, setSideMenuIsVisible] = useState<boolean>(true)
@@ -29,7 +88,12 @@ const Home = () => {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>(
     []
   )
-
+  const [isBuying, setIsBuying] = useState(false)
+  const [activeTab, setActiveTab] = useState<'alternatives' | 'overview'>(
+    'alternatives'
+  )
+  const [currentAlternativeIndex, setCurrentAlternativeIndex] =
+    useState<number>(0)
   const [formData, setFormData] = useState<FormData>({
     allergies: '',
     dietGoal: '',
@@ -154,17 +218,18 @@ const Home = () => {
     }
   }
 
-  const transformAIResponse = (responseBody: unknown): AIResponse => {
+  const transformAIResponse = (responseBody: {
+    overview: string
+    alternatives: AlternativeInfo[]
+  }): AIResponse => {
     const { overview, alternatives } = responseBody
 
-    const transformedAlternatives: Alternative[] = alternatives.map(
-      (alt: unknown) => ({
-        name: alt.name,
-        comparison: { isOpen: false, content: alt.comparison },
-        ingredients: { isOpen: false, content: alt.ingredients },
-        recipe: { isOpen: false, content: alt.recipe }
-      })
-    )
+    const transformedAlternatives: Alternative[] = alternatives.map((alt) => ({
+      name: alt.name,
+      comparison: { isOpen: false, content: alt.comparison },
+      ingredients: { isOpen: false, content: alt.ingredients },
+      recipe: { isOpen: false, content: alt.recipe }
+    }))
 
     const transformedResponse: AIResponse = {
       overview,
@@ -174,6 +239,44 @@ const Home = () => {
     return transformedResponse
   }
 
+  const toggleSection = (section: 'comparison' | 'ingredients' | 'recipe') => {
+    console.log('toggling...', section)
+    setLatestAIResponse((prevState) => ({
+      ...prevState!,
+      alternatives: prevState!.alternatives.map((alternative, index) => {
+        if (index === currentAlternativeIndex) {
+          console.log(index, currentAlternativeIndex)
+
+          return {
+            ...alternative,
+            [section]: {
+              ...alternative[section],
+              ...{ isOpen: !(alternative[section] as AlternativeInfo).isOpen }
+            }
+          }
+        }
+        return alternative
+      })
+    }))
+  }
+
+  const handleBuyIngredients = () => {
+    console.log(
+      'Buy ingredients:',
+      latestAIResponse?.alternatives[currentAlternativeIndex]
+    )
+
+    setIsBuying(true)
+  }
+
+  const handleBuyAlternative = () => {
+    console.log(
+      'Buy alternative:',
+      latestAIResponse?.alternatives[currentAlternativeIndex]
+    )
+
+    setIsBuying(true)
+  }
 
   return (
     <div className="relative flex flex-col items-start justify-center overflow-y-scroll">
@@ -235,7 +338,7 @@ const Home = () => {
               <button
                 disabled={isFetchingResponse}
                 onClick={startConversationWithAI}
-                className={`flex items-center rounded-lg text-white bg-teal-700 px-3 py-2 transition-colors ease-in-out dark:bg-teal-500 dark:hover:bg-teal-600 ${
+                className={`flex items-center rounded-lg bg-teal-700 px-3 py-2 text-white transition-colors ease-in-out dark:bg-teal-500 dark:hover:bg-teal-600 ${
                   isFetchingResponse ? 'opacity-70' : ''
                 }`}
               >
@@ -253,6 +356,259 @@ const Home = () => {
               </button>
             </div>
           </div>
+
+          {isBuying ? (
+            <div className="mt-4 h-full flex-1 flex flex-col">
+              <div className="mb-2 flex items-center justify-between">
+                <div className="items-center flex justify-start">
+                  <button
+                    onClick={() => setIsBuying(false)}
+                    className="rounded-full p-2 transition-colors ease-in-out dark:hover:bg-gray-800"
+                  >
+                    <FaArrowLeftLong size={24} className="text-teal-500" />
+                  </button>
+                </div>
+
+                <h3 className="flex-1 text-center text-2xl font-medium text-teal-500">
+                  Continue Shopping From
+                </h3>
+              </div>
+
+              <div className="mb-4 flex items-center justify-center">
+                <div className="grid grid-cols-3 gap-4">
+                  {FOOD_DELIVERY_SERVICES.map((service) => (
+                    <a
+                      key={service.id}
+                      href={service.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md border border-gray-300/40 px-10 py-4 transition-colors ease-in-out hover:border-teal-600 hover:bg-teal-600"
+                    >
+                      <div className="flex flex-col items-center">
+                        <img
+                          src={service.logo}
+                          alt={service.label}
+                          className="mb-2 size-24 object-contain"
+                        />
+                        <span className="font-medium">{service.label}</span>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {latestAIResponse && (
+                <div className="flex h-full flex-1 flex-col">
+                  <div className="mx-auto mb-4 flex w-min items-center space-x-4 rounded-md border border-gray-800 bg-gray-800 px-3 py-[0.35rem]">
+                    <button
+                      onClick={() => setActiveTab('overview')}
+                      className={`rounded-md px-4 py-2 transition-colors ease-in-out ${
+                        activeTab === 'overview'
+                          ? 'bg-teal-500 text-white'
+                          : ' text-gray-800 hover:bg-gray-300 dark:bg-gray-700/20 dark:text-gray-200 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      Overview
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('alternatives')}
+                      className={`rounded-md px-4 py-2 transition-colors ease-in-out ${
+                        activeTab === 'alternatives'
+                          ? 'bg-teal-500 text-white'
+                          : 'text-gray-800 hover:bg-gray-300 dark:bg-gray-700/20 dark:text-gray-200 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      Alternatives
+                    </button>
+                  </div>
+
+                  {/* eslint-disable-next-line tailwindcss/no-custom-classname */}
+                  <div className="response-container max-h-[40vh] overflow-y-scroll rounded-md border border-gray-800 bg-gray-800">
+                    {activeTab === 'overview' ? (
+                      <div className="p-4">{latestAIResponse.overview}</div>
+                    ) : (
+                      <div className="p-4">
+                        <h2 className="mb-4 text-center text-2xl">
+                          {
+                            latestAIResponse.alternatives[
+                              currentAlternativeIndex
+                            ].name
+                          }
+                        </h2>
+
+                        <div>
+                          <div
+                            className="group mb-4 flex cursor-pointer items-center justify-between rounded-md border border-gray-900 bg-gray-900 p-2 transition ease-in-out hover:border-gray-700 hover:bg-gray-700"
+                            onClick={() => toggleSection('comparison')}
+                          >
+                            <span>Comparison</span>
+                            {latestAIResponse.alternatives[
+                              currentAlternativeIndex
+                            ].comparison.isOpen ? (
+                              <FaChevronDown
+                                className="text-teal-700 group-hover:text-teal-500"
+                                size={20}
+                              />
+                            ) : (
+                              <FaChevronRight
+                                className="text-teal-700 group-hover:text-teal-500"
+                                size={20}
+                              />
+                            )}
+                          </div>
+                          {latestAIResponse.alternatives[
+                            currentAlternativeIndex
+                          ].comparison.isOpen && (
+                            <div className="mb-4 rounded-md bg-gray-700 p-4">
+                              {
+                                latestAIResponse.alternatives[
+                                  currentAlternativeIndex
+                                ].comparison.content
+                              }
+                            </div>
+                          )}
+
+                          <div
+                            className="group mb-4 flex cursor-pointer items-center justify-between rounded-md border border-gray-900 bg-gray-900 p-2 transition ease-in-out hover:border-gray-700 hover:bg-gray-700"
+                            onClick={() => toggleSection('ingredients')}
+                          >
+                            <span>Ingredients</span>
+                            {latestAIResponse.alternatives[
+                              currentAlternativeIndex
+                            ].ingredients.isOpen ? (
+                              <FaChevronDown
+                                className="text-teal-700 group-hover:text-teal-500"
+                                size={20}
+                              />
+                            ) : (
+                              <FaChevronRight
+                                className="text-teal-700 group-hover:text-teal-500"
+                                size={20}
+                              />
+                            )}
+                          </div>
+
+                          {latestAIResponse.alternatives[
+                            currentAlternativeIndex
+                          ].ingredients.isOpen && (
+                            <div className="mb-4 rounded-md bg-gray-700 p-4">
+                              <ul>
+                                {latestAIResponse.alternatives[
+                                  currentAlternativeIndex
+                                ].ingredients.content.map(
+                                  (ingredient, index) => (
+                                    <li key={index} className="mb-2">
+                                      {ingredient}
+                                    </li>
+                                  )
+                                )}
+                              </ul>
+                            </div>
+                          )}
+                          <div
+                            className="group mb-4 flex cursor-pointer items-center justify-between rounded-md border border-gray-900 bg-gray-900 p-2 transition ease-in-out hover:border-gray-700 hover:bg-gray-700"
+                            onClick={() => toggleSection('recipe')}
+                          >
+                            <span>Recipe</span>
+                            {latestAIResponse.alternatives[
+                              currentAlternativeIndex
+                            ].recipe.isOpen ? (
+                              <FaChevronDown
+                                className="text-teal-700 group-hover:text-teal-500"
+                                size={20}
+                              />
+                            ) : (
+                              <FaChevronRight
+                                className="text-teal-700 group-hover:text-teal-500"
+                                size={20}
+                              />
+                            )}
+                          </div>
+
+                          {latestAIResponse.alternatives[
+                            currentAlternativeIndex
+                          ].recipe.isOpen && (
+                            <div className="mb-4 rounded-md bg-gray-700 p-4">
+                              <ol className="list-decimal pl-4">
+                                {latestAIResponse.alternatives[
+                                  currentAlternativeIndex
+                                ].recipe.content.map((step, index) => (
+                                  <li key={index} className="mb-2">
+                                    {step}
+                                  </li>
+                                ))}
+                              </ol>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-4 flex items-center justify-between">
+                    {activeTab === 'alternatives' && (
+                      <button
+                        onClick={() =>
+                          setCurrentAlternativeIndex((prevIndex) =>
+                            Math.max(prevIndex - 1, 0)
+                          )
+                        }
+                        className={`rounded-full p-2 transition-colors ease-in-out dark:hover:bg-gray-800 ${
+                          currentAlternativeIndex === 0
+                            ? 'cursor-not-allowed opacity-50'
+                            : ''
+                        }`}
+                        disabled={currentAlternativeIndex === 0}
+                      >
+                        <FaArrowLeftLong size={24} className="text-teal-500" />
+                      </button>
+                    )}
+
+                    <div className="flex w-full items-center justify-center space-x-4">
+                      <button
+                        onClick={handleBuyIngredients}
+                        className="rounded-md border-2 border-teal-600 bg-transparent px-4 py-2 text-white transition-colors ease-in-out hover:bg-teal-600 focus:ring-4 focus:ring-teal-800"
+                      >
+                        Buy Ingredients
+                      </button>
+                      <button
+                        onClick={handleBuyAlternative}
+                        className="rounded-md border-2 border-teal-500 bg-teal-500 px-10 py-2 text-white transition-colors ease-in-out hover:border-teal-600 hover:bg-teal-600 focus:ring-4 focus:ring-teal-800"
+                      >
+                        Buy Meal
+                      </button>
+                    </div>
+
+                    {activeTab === 'alternatives' && (
+                      <button
+                        onClick={() =>
+                          setCurrentAlternativeIndex((prevIndex) =>
+                            Math.min(
+                              prevIndex + 1,
+                              latestAIResponse.alternatives.length - 1
+                            )
+                          )
+                        }
+                        className={`rounded-full p-2 transition-colors ease-in-out dark:hover:bg-gray-800 ${
+                          currentAlternativeIndex ===
+                          latestAIResponse.alternatives.length - 1
+                            ? 'cursor-not-allowed opacity-50'
+                            : ''
+                        }`}
+                        disabled={
+                          currentAlternativeIndex ===
+                          latestAIResponse.alternatives.length - 1
+                        }
+                      >
+                        <FaArrowRightLong size={24} className="text-teal-500" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
 
