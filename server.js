@@ -2,7 +2,7 @@ import express from "express";
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
 import dotenv from "dotenv";
-import apiRouter from "api/router.js";
+import apiRouter from "./api/router.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -13,6 +13,8 @@ const initializeExpressServer = async () => {
     const app = express();
     app.use(express.json({ limit: "50mb" }));
     app.use(express.urlencoded({ extended: false, limit: "50mb" }));
+
+    app.use("/api/v1/ai-conversation", apiRouter);
 
     if (process.env.NODE_ENV === "production") {
         console.log("up here prod");

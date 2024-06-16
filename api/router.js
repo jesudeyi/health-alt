@@ -1,3 +1,16 @@
+import express from "express";
+import Anthropic from "@anthropic-ai/sdk";
+import dotenv from "dotenv";
+
+const router = express.Router();
+dotenv.config();
+
+// Initialize Anthropic AI
+const anthropic = new Anthropic({
+    apiKey: process.env.CLAUDE_API_KEY,
+});
+
+router.post("/", async (req, res) => {
     const systemMessage = `INTRO:
 The primary input from users is their health info (details later) and the meal/junk input. We need to do the following:
 
@@ -50,3 +63,27 @@ The meal/junk to analyze or suggest alternatives to is the meal property.
 }
 
 Allergies, dietaryPreference, healthConditions and lifeStage being comma separated strings`;
+
+    try {
+        const { messageHistory } = req.body;
+        console.log("history: ", messageHistory);
+
+        // Call Anthropic AI to generate response message
+        const msg = await anthropic.messages.create({
+            model: "claude-3-opus-20240229",
+            temperature: 0.1,
+            system: systemMessage,
+            max_tokens: 2024,
+            messages: messageHistory,
+        });
+
+        // Return the generated message to the client
+        console.log("MESSAGE: ", msg.content[0].text);
+        res.status(200).json({ msg });
+    } catch (error) {
+        console.error("Unable to converse with AI: ", error);
+        res.status(500).json({ error: "Unable to converse with AI" });
+    }
+});
+
+export default router;
