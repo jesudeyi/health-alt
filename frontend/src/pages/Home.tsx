@@ -1,4 +1,10 @@
-import React, { ChangeEvent, MouseEvent, useState } from 'react'
+import React, {
+  ChangeEvent,
+  MouseEvent,
+  useEffect,
+  useRef,
+  useState
+} from 'react'
 import axios from 'axios'
 import { ClipLoader } from 'react-spinners'
 import { BsCamera } from 'react-icons/bs'
@@ -39,6 +45,21 @@ interface AlternativeInfo {
 interface AIResponse {
   overview: string
   alternatives: Alternative[]
+}
+
+interface Message {
+  role: 'assistant' | 'user'
+  content:
+    | string
+    | Array<{
+        source?: {
+          type: string
+          media_type: string
+          data: string
+        }
+        text?: string
+        type: 'image' | 'text'
+      }>
 }
 
 const FOOD_DELIVERY_SERVICES = [
@@ -86,9 +107,7 @@ const Home = () => {
   const [latestAIResponse, setLatestAIResponse] = useState<AIResponse | null>(
     null
   )
-  const [messages, setMessages] = useState<{ role: string; content: string }[]>(
-    []
-  )
+  const [messages, setMessages] = useState<Message[]>([])
   const [isBuying, setIsBuying] = useState(false)
   const [activeTab, setActiveTab] = useState<'alternatives' | 'overview'>(
     'alternatives'
@@ -107,6 +126,7 @@ const Home = () => {
     lifeStage: '',
     meal: ''
   })
+  const imageData = useRef<string | ArrayBuffer | null>(null)
 
   const cachedMeals = [
     'fried puff puff',
@@ -114,6 +134,18 @@ const Home = () => {
     'jam doughnut',
     'milky doughnut'
   ]
+
+  useEffect(() => {
+    const storedRememberData = localStorage.getItem('rememberData')
+    if (storedRememberData) {
+      setRememberData(JSON.parse(storedRememberData))
+    }
+
+    const storedFormData = localStorage.getItem('formData')
+    if (storedFormData) {
+      setFormData(JSON.parse(storedFormData))
+    }
+  }, [])
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target
@@ -150,7 +182,7 @@ const Home = () => {
       lifeStage
     } = formData
 
-    if (!meal.trim()) {
+    if (!meal.trim() && !imageData.current) {
       return false
     }
 
@@ -172,6 +204,7 @@ const Home = () => {
     const formIsValid = validateForm()
 
     if (formIsValid) {
+      console.log('FD: ', formData)
       if (cachedMeals.includes(formData.meal.toLowerCase())) {
         console.log(
           'Loading from cache: ',
@@ -186,18 +219,42 @@ const Home = () => {
         return
       }
       setIsFetchingResponse(true)
-      console.log('Form data: ', formData)
 
-      const newMessage = { role: 'user', content: JSON.stringify(formData) }
+      let newMessage: Message
+
+      if (imageData.current) {
+        newMessage = {
+          role: 'user',
+          content: [
+            {
+              source: {
+                type: 'base64',
+                media_type: (imageData.current as string)
+                  .split(';')[0]
+                  .split(':')[1],
+                data: (imageData.current as string).split(',')[1]
+              },
+              type: 'image'
+            }
+          ]
+        }
+      } else {
+        newMessage = { role: 'user', content: JSON.stringify(formData) }
+      }
 
       try {
         const response = await axios.post('/api/v1/ai-conversation', {
           messageHistory: [...messages, newMessage]
         })
 
+        console.log('RESPONSE: ', response.data.msg.content[0].text)
+
         if (JSON.parse(response.data.msg.content[0].text)?.error) {
           alert('Your input has no relation with food health')
         }
+
+        console.log('getting ai reponse')
+
         const aiResponse = transformAIResponse(
           JSON.parse(response.data.msg.content[0].text)
         )
@@ -216,9 +273,15 @@ const Home = () => {
         setIsFetchingResponse(false)
       }
     } else {
-      alert(
-        "Please provide your health information to help you better. We don't know you, your data is safe and doesn't leave your device"
-      )
+      console.log('FD: ', formData)
+
+      if (!formData.meal.trim() && !imageData.current) {
+        alert('Please provide the junk food you want to replace')
+      } else {
+        alert(
+          "Please provide your health information to help you better. We don't know you, your data is safe and doesn't leave your device"
+        )
+      }
     }
   }
 
@@ -226,6 +289,8 @@ const Home = () => {
     overview: string
     alternatives: AlternativeInfo[]
   }): AIResponse => {
+    console.log('transforming...')
+
     const { overview, alternatives } = responseBody
 
     const transformedAlternatives: Alternative[] = alternatives.map((alt) => ({
@@ -290,7 +355,10 @@ const Home = () => {
     localStorage.setItem('rememberData', JSON.stringify(!rememberData))
 
     if (!rememberData) {
-      localStorage.setItem('formData', JSON.stringify(formData))
+      localStorage.setItem(
+        'formData',
+        JSON.stringify({ ...formData, meaL: '' })
+      )
     } else {
       localStorage.removeItem('formData')
     }
@@ -299,6 +367,34 @@ const Home = () => {
   const handleFitnessLevelChange = (level: string) => {
     setFormData({ ...formData, fitnessLevel: level })
     setFitnessLevelDropdownOpen(false)
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e?.target?.files?.[0]
+    setFormData({ ...formData, meal: '' })
+
+    if (file) {
+      const reader = new FileReader()
+
+      reader.onloadend = async () => {
+        const base64Data = reader.result
+
+        if (base64Data) {
+          imageData.current = base64Data
+          await startConversationWithAI()
+        }
+      }
+
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const removeImage = () => {
+    console.log('removing')
+    if (!isFetchingResponse) {
+      console.log('yes reomve')
+      imageData.current = null
+    }
   }
 
   return (
@@ -346,18 +442,66 @@ const Home = () => {
             <input
               value={formData.meal}
               onChange={handleFormChange}
+              onClick={() => {
+                console.log('click...')
+                imageData.current && removeImage()
+              }}
               name="meal"
               type="text"
-              placeholder="What junk am I helping you with today?"
-              className="w-full rounded-2xl border border-gray-300 py-4 pl-6 pr-24 outline-none transition-colors ease-in-out focus:outline-none focus:ring-2  focus:ring-teal-700 dark:border-teal-800 dark:bg-gray-800 dark:hover:border-teal-700"
+              placeholder={
+                imageData.current
+                  ? ''
+                  : 'What junk am I helping you with today?'
+              }
+              className={`w-full rounded-2xl border border-gray-300 py-4 pl-6 pr-24 outline-none transition-colors ease-in-out focus:outline-none focus:ring-2  focus:ring-teal-700 dark:border-teal-800 dark:bg-gray-800 dark:hover:border-teal-700 ${
+                isFetchingResponse ? 'cursor-not-allowed' : ''
+              }`}
+              disabled={isFetchingResponse}
             />
+            {imageData.current && (
+              <div className="group absolute left-[40%] top-1/2 -translate-y-1/2">
+                <img
+                  src={imageData.current as string}
+                  alt="meal"
+                  className={`size-12 ${
+                    isFetchingResponse
+                      ? 'cursor-not-allowed'
+                      : 'cursor-pointer group-hover:opacity-50'
+                  } rounded-lg`}
+                  onClick={removeImage}
+                />
+
+                <IoCloseSharp
+                  className={`absolute left-[30%] top-1/4 hidden ${
+                    isFetchingResponse
+                      ? 'cursor-not-allowed'
+                      : 'cursor-pointer group-hover:block'
+                  } text-white`}
+                  onClick={removeImage}
+                  size={24}
+                />
+              </div>
+            )}
             <div className="absolute right-4 top-1/2 flex -translate-y-1/2 space-x-2">
-              <button
-                disabled={isFetchingResponse}
-                className="rounded-lg border px-3 py-2 dark:border-teal-900/80 dark:bg-gray-900"
+              <label
+                className={`rounded-lg border px-3 py-2 dark:border-teal-900/80 dark:bg-gray-900 ${
+                  isFetchingResponse
+                    ? 'cursor-not-allowed opacity-50'
+                    : 'cursor-pointer'
+                }`}
+                htmlFor="meal-upload"
               >
                 <BsCamera size={18} />
-              </button>
+                <input
+                  className="hidden"
+                  id="meal-upload"
+                  name="meal"
+                  disabled={isFetchingResponse}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+              </label>
               <button
                 disabled={isFetchingResponse}
                 onClick={startConversationWithAI}
