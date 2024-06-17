@@ -288,8 +288,6 @@ const Home = () => {
     overview: string
     alternatives: AlternativeInfo[]
   }): AIResponse => {
-    console.log('transforming...')
-
     const { overview, alternatives } = responseBody
 
     const transformedAlternatives: Alternative[] = alternatives.map((alt) => ({
@@ -309,6 +307,7 @@ const Home = () => {
 
   const toggleSection = (section: 'comparison' | 'ingredients' | 'recipe') => {
     console.log('toggling...', section)
+
     setLatestAIResponse((prevState) => ({
       ...prevState!,
       alternatives: prevState!.alternatives.map((alternative, index) => {
@@ -387,9 +386,7 @@ const Home = () => {
   }
 
   const removeImage = () => {
-    console.log('removing')
     if (!isFetchingResponse) {
-      console.log('yes reomve')
       imageData.current = null
     }
   }
@@ -437,10 +434,9 @@ const Home = () => {
           {/* Input section */}
           <div className="relative">
             <input
-              value={formData?.meal}
+              value={formData?.meal || ''}
               onChange={handleFormChange}
               onClick={() => {
-                console.log('click...')
                 imageData.current && removeImage()
               }}
               name="meal"
@@ -529,13 +525,13 @@ const Home = () => {
                   </button>
                 </div>
 
-                <h3 className="flex-1 text-center text-2xl font-medium text-teal-500">
+                <h3 className="flex-1 text-center text-xl md:text-2xl font-medium text-teal-500">
                   Continue Shopping From
                 </h3>
               </div>
 
               <div className="mb-4 flex items-center justify-center">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {FOOD_DELIVERY_SERVICES.map((service) => (
                     <a
                       key={service.id}
@@ -550,7 +546,9 @@ const Home = () => {
                           alt={service.label}
                           className="mb-2 size-24 object-contain"
                         />
-                        <span className="font-medium">{service.label}</span>
+                        <span className="text-center font-medium">
+                          {service.label}
+                        </span>
                       </div>
                     </a>
                   ))}
