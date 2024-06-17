@@ -395,7 +395,7 @@ const Home = () => {
     <div className="relative flex flex-col items-start justify-center">
       <div
         className={`my-auto ${
-          sideMenuIsVisible ? 'w-0 md:w-2/3' : 'w-full'
+          sideMenuIsVisible ? 'md:w-2/3' : 'w-full'
         } flex-col items-center justify-center`}
       >
         {/* A. Topmost section */}
