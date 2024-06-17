@@ -25,7 +25,7 @@ interface FormData {
   healthConditions: string
   fitnessLevel: string
   lifeStage: string
-  meal: string
+  meal?: string
 }
 
 interface Alternative {
@@ -118,13 +118,13 @@ const Home = () => {
   const [fitnessLevelDropdownOpen, setFitnessLevelDropdownOpen] =
     useState(false)
   const [formData, setFormData] = useState<FormData>({
+    meal: '',
     allergies: '',
     dietGoal: '',
     dietaryPreference: '',
     healthConditions: '',
     fitnessLevel: '',
-    lifeStage: '',
-    meal: ''
+    lifeStage: ''
   })
   const imageData = useRef<string | ArrayBuffer | null>(null)
 
@@ -143,6 +143,7 @@ const Home = () => {
 
     const storedFormData = localStorage.getItem('formData')
     if (storedFormData) {
+      console.log("FD: ", JSON.parse(storedFormData))
       setFormData(JSON.parse(storedFormData))
     }
   }, [])
@@ -205,15 +206,15 @@ const Home = () => {
 
     if (formIsValid) {
       console.log('FD: ', formData)
-      if (cachedMeals.includes(formData.meal.toLowerCase())) {
+      if (cachedMeals.includes(formData?.meal?.toLowerCase())) {
         console.log(
           'Loading from cache: ',
-          localData[formData.meal.toLowerCase()]
+          localData[formData?.meal?.toLowerCase()]
         )
         setIsFetchingResponse(true)
         setTimeout(() => {
           setIsFetchingResponse(false)
-          setLatestAIResponse(localData[formData.meal.toLowerCase()])
+          setLatestAIResponse(localData[formData?.meal?.toLowerCase()])
         }, 2000)
 
         return
@@ -275,7 +276,7 @@ const Home = () => {
     } else {
       console.log('FD: ', formData)
 
-      if (!formData.meal.trim() && !imageData.current) {
+      if (!formData?.meal?.trim() && !imageData.current) {
         alert('Please provide the junk food you want to replace')
       } else {
         alert(
@@ -355,10 +356,8 @@ const Home = () => {
     localStorage.setItem('rememberData', JSON.stringify(!rememberData))
 
     if (!rememberData) {
-      localStorage.setItem(
-        'formData',
-        JSON.stringify({ ...formData, meaL: '' })
-      )
+      delete formData.meal
+      localStorage.setItem('formData', JSON.stringify({ ...formData }))
     } else {
       localStorage.removeItem('formData')
     }
@@ -440,7 +439,7 @@ const Home = () => {
           {/* Input section */}
           <div className="relative">
             <input
-              value={formData.meal}
+              value={formData?.meal}
               onChange={handleFormChange}
               onClick={() => {
                 console.log('click...')
