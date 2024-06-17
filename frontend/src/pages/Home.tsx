@@ -253,13 +253,9 @@ const Home = () => {
         if (JSON.parse(response.data.msg.content[0].text)?.error) {
           alert('Your input has no relation with food health')
         } else {
-          console.log('getting ai response')
-
           const aiResponse = transformAIResponse(
             JSON.parse(response.data.msg.content[0].text)
           )
-
-          console.log('Parsed Response: ', aiResponse)
 
           setLatestAIResponse(aiResponse)
         }
