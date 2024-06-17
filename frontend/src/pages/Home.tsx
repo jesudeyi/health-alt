@@ -396,12 +396,12 @@ const Home = () => {
       <div
         className={`my-auto ${
           sideMenuIsVisible ? 'md:w-2/3' : 'w-full'
-        } flex-col items-center justify-center`}
+        } flex-col items-center justify-center transition-[width] ease-in-out`}
       >
         {/* A. Topmost section */}
-        <div className="mb-12 flex items-center justify-start md:justify-center px-4">
+        <div className="mb-12 flex items-center justify-start px-4 md:justify-center">
           {/* Logo */}
-          <div className="md:flex-1 md:text-center mt-2">
+          <div className="mt-2 md:flex-1 md:text-center">
             <h1 className="font-[cursive] text-4xl font-medium tracking-wider">
               <span>health</span>
               <span className="text-teal-500">ALT</span>
@@ -422,9 +422,9 @@ const Home = () => {
 
         {/* B. Next section */}
         <div
-          className={`mx-auto h-full w-full ${
+          className={`mx-auto size-full ${
             sideMenuIsVisible ? 'md:w-3/4' : 'md:w-1/2'
-          } space-y-4 px-4`}
+          } space-y-4 px-4 transition-[width] ease-in-out`}
         >
           {/* Greeting */}
           <h2 className="text-center text-4xl font-medium">
@@ -494,7 +494,7 @@ const Home = () => {
               <button
                 disabled={isFetchingResponse}
                 onClick={startConversationWithAI}
-                className={`flex items-center rounded-lg bg-teal-700 px-2 md:px-3 py-2 text-white transition-colors ease-in-out dark:bg-teal-500 dark:hover:bg-teal-600 ${
+                className={`flex items-center rounded-lg bg-teal-700 p-2 text-white transition-colors ease-in-out md:px-3 dark:bg-teal-500 dark:hover:bg-teal-600 ${
                   isFetchingResponse ? 'opacity-70' : ''
                 }`}
               >
@@ -514,9 +514,9 @@ const Home = () => {
           </div>
 
           {isBuying ? (
-            <div className="mt-4 h-full flex-1 flex flex-col">
+            <div className="mt-4 flex h-full flex-1 flex-col">
               <div className="mb-2 flex items-center justify-between">
-                <div className="items-center flex justify-start">
+                <div className="flex items-center justify-start">
                   <button
                     onClick={() => setIsBuying(false)}
                     className="rounded-full p-2 transition-colors ease-in-out dark:hover:bg-gray-800"
@@ -525,13 +525,13 @@ const Home = () => {
                   </button>
                 </div>
 
-                <h3 className="flex-1 text-center text-xl md:text-2xl font-medium text-teal-500">
+                <h3 className="flex-1 text-center text-xl font-medium text-teal-500 md:text-2xl">
                   Continue Shopping From
                 </h3>
               </div>
 
               <div className="mb-4 flex items-center justify-center">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                   {FOOD_DELIVERY_SERVICES.map((service) => (
                     <a
                       key={service.id}
@@ -723,7 +723,7 @@ const Home = () => {
                       </button>
                     )}
 
-                    <div className="flex-col-reverse flex md:flex-row w-full items-center justify-center gap-y-2 md:gap-y-0 gap-x-4">
+                    <div className="flex w-full flex-col-reverse items-center justify-center gap-x-4 gap-y-2 md:flex-row md:gap-y-0">
                       <button
                         onClick={handleBuyIngredients}
                         className="rounded-md border-2 border-teal-600 bg-transparent px-4 py-2 text-white transition-colors ease-in-out hover:bg-teal-600 focus:ring-4 focus:ring-teal-800"
@@ -772,7 +772,7 @@ const Home = () => {
 
       {/* Side menu */}
       <div
-        className={`fixed right-0 top-0 md:flex h-screen w-full md:w-1/3 flex-col justify-center border-l-2 border-l-gray-700 px-6 shadow-lg shadow-black/30 transition-transform duration-300 dark:bg-gray-900 ${
+        className={`fixed right-0 top-0 h-screen w-full flex-col justify-center border-l-2 border-l-gray-700 px-6 shadow-lg shadow-black/30 transition-transform duration-300 md:flex md:w-1/3 dark:bg-gray-900 ${
           sideMenuIsVisible ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
