@@ -143,7 +143,7 @@ const Home = () => {
 
     const storedFormData = localStorage.getItem('formData')
     if (storedFormData) {
-      console.log("FD: ", JSON.parse(storedFormData))
+      console.log('FD: ', JSON.parse(storedFormData))
       setFormData(JSON.parse(storedFormData))
     }
   }, [])
@@ -252,17 +252,17 @@ const Home = () => {
 
         if (JSON.parse(response.data.msg.content[0].text)?.error) {
           alert('Your input has no relation with food health')
+        } else {
+          console.log('getting ai response')
+
+          const aiResponse = transformAIResponse(
+            JSON.parse(response.data.msg.content[0].text)
+          )
+
+          console.log('Parsed Response: ', aiResponse)
+
+          setLatestAIResponse(aiResponse)
         }
-
-        console.log('getting ai reponse')
-
-        const aiResponse = transformAIResponse(
-          JSON.parse(response.data.msg.content[0].text)
-        )
-
-        console.log('Parsed Response: ', aiResponse)
-
-        setLatestAIResponse(aiResponse)
 
         setMessages([])
       } catch (error) {
