@@ -10,7 +10,7 @@ const App = () => {
   return (
     <>
       <Router>
-        <div className="h-screen bg-gray-100 px-7 pt-4 font-[rubik] text-[0.9rem] leading-[1.35rem] text-gray-900 dark:bg-gray-900 dark:text-gray-200">
+        <div className="min-h-screen bg-gray-100 px-7 pt-4 font-[rubik] md:text-[0.9rem] md:leading-[1.35rem] text-gray-900 dark:bg-gray-900 dark:text-gray-200">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route

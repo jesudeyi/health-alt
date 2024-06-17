@@ -17,7 +17,7 @@ import {
   FaChevronRight
 } from 'react-icons/fa6'
 import localData from 'cache'
-import { capitalizeString } from 'utils'
+import { capitalizeString, isMobile } from 'utils'
 interface FormData {
   allergies: string
   dietGoal: string
@@ -102,7 +102,9 @@ const FOOD_DELIVERY_SERVICES = [
 ]
 
 const Home = () => {
-  const [sideMenuIsVisible, setSideMenuIsVisible] = useState(true)
+  const [sideMenuIsVisible, setSideMenuIsVisible] = useState(
+    isMobile() ? false : true
+  )
   const [isFetchingResponse, setIsFetchingResponse] = useState(false)
   const [latestAIResponse, setLatestAIResponse] = useState<AIResponse | null>(
     null
@@ -183,7 +185,7 @@ const Home = () => {
       lifeStage
     } = formData
 
-    if (!meal.trim() && !imageData.current) {
+    if (!meal?.trim() && !imageData.current) {
       return false
     }
 
@@ -400,9 +402,9 @@ const Home = () => {
         } flex-col items-center justify-center`}
       >
         {/* A. Topmost section */}
-        <div className="mb-12 flex items-center justify-between px-4">
+        <div className="mb-12 flex items-center justify-start md:justify-center px-4">
           {/* Logo */}
-          <div className="flex-1 text-center">
+          <div className="md:flex-1 md:text-center mt-2">
             <h1 className="font-[cursive] text-4xl font-medium tracking-wider">
               <span>health</span>
               <span className="text-teal-500">ALT</span>
@@ -413,7 +415,7 @@ const Home = () => {
             <div className="absolute right-0 top-2 flex items-center space-x-4">
               <button
                 onClick={() => setSideMenuIsVisible(true)}
-                className="rounded-full p-2 transition-colors ease-in-out hover:bg-gray-800 dark:bg-teal-700 dark:hover:bg-teal-600"
+                className="rounded-full p-2 transition-colors ease-in-out hover:bg-gray-800 dark:bg-teal-500 dark:hover:bg-teal-600"
               >
                 <IoIosOptions size={24} />
               </button>
@@ -423,8 +425,8 @@ const Home = () => {
 
         {/* B. Next section */}
         <div
-          className={`mx-auto h-full ${
-            sideMenuIsVisible ? 'w-3/4' : 'w-1/2'
+          className={`mx-auto h-full w-full ${
+            sideMenuIsVisible ? 'md:w-3/4' : 'md:w-1/2'
           } space-y-4 px-4`}
         >
           {/* Greeting */}
@@ -443,11 +445,7 @@ const Home = () => {
               }}
               name="meal"
               type="text"
-              placeholder={
-                imageData.current
-                  ? ''
-                  : 'What junk am I helping you with today?'
-              }
+              placeholder={imageData.current ? '' : 'Feed me that junk'}
               className={`w-full rounded-2xl border border-gray-300 py-4 pl-6 pr-24 outline-none transition-colors ease-in-out focus:outline-none focus:ring-2  focus:ring-teal-700 dark:border-teal-800 dark:bg-gray-800 dark:hover:border-teal-700 ${
                 isFetchingResponse ? 'cursor-not-allowed' : ''
               }`}
@@ -500,20 +498,20 @@ const Home = () => {
               <button
                 disabled={isFetchingResponse}
                 onClick={startConversationWithAI}
-                className={`flex items-center rounded-lg bg-teal-700 px-3 py-2 text-white transition-colors ease-in-out dark:bg-teal-500 dark:hover:bg-teal-600 ${
+                className={`flex items-center rounded-lg bg-teal-700 px-2 md:px-3 py-2 text-white transition-colors ease-in-out dark:bg-teal-500 dark:hover:bg-teal-600 ${
                   isFetchingResponse ? 'opacity-70' : ''
                 }`}
               >
-                <span className="mt-0.5">healthALT</span>
+                <span className="mt-0.5 hidden md:block">healthALT</span>
                 {isFetchingResponse ? (
                   <ClipLoader
                     color={'#FFF'}
                     loading={isFetchingResponse}
                     size={18}
-                    className="ml-2"
+                    className="md:ml-2"
                   />
                 ) : (
-                  <IoSendSharp size={18} className="ml-2" />
+                  <IoSendSharp size={18} className="ml-1 md:ml-2" />
                 )}
               </button>
             </div>
@@ -727,7 +725,7 @@ const Home = () => {
                       </button>
                     )}
 
-                    <div className="flex w-full items-center justify-center space-x-4">
+                    <div className="flex-col-reverse flex md:flex-row w-full items-center justify-center gap-y-2 md:gap-y-0 gap-x-4">
                       <button
                         onClick={handleBuyIngredients}
                         className="rounded-md border-2 border-teal-600 bg-transparent px-4 py-2 text-white transition-colors ease-in-out hover:bg-teal-600 focus:ring-4 focus:ring-teal-800"
@@ -776,7 +774,7 @@ const Home = () => {
 
       {/* Side menu */}
       <div
-        className={`hidden md:fixed right-0 top-0 md:flex h-screen w-full md:w-1/3 flex-col justify-center border-l-2 border-l-gray-700 px-6 shadow-lg shadow-black/30 transition-transform duration-300 dark:bg-gray-900 ${
+        className={`fixed right-0 top-0 md:flex h-screen w-full md:w-1/3 flex-col justify-center border-l-2 border-l-gray-700 px-6 shadow-lg shadow-black/30 transition-transform duration-300 dark:bg-gray-900 ${
           sideMenuIsVisible ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
