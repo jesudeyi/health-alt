@@ -393,10 +393,10 @@ const Home = () => {
   }
 
   return (
-    <div className="relative flex flex-col items-start justify-center overflow-y-scroll">
+    <div className="relative flex flex-col items-start justify-center">
       <div
         className={`my-auto ${
-          sideMenuIsVisible ? 'w-2/3' : 'w-full'
+          sideMenuIsVisible ? 'w-0 md:w-2/3' : 'w-full'
         } flex-col items-center justify-center`}
       >
         {/* A. Topmost section */}
@@ -776,7 +776,7 @@ const Home = () => {
 
       {/* Side menu */}
       <div
-        className={`fixed right-0 top-0 flex h-screen w-1/3 flex-col justify-center border-l-2 border-l-gray-700 px-6 shadow-lg shadow-black/30 transition-transform duration-300 dark:bg-gray-900 ${
+        className={`hidden md:fixed right-0 top-0 md:flex h-screen w-full md:w-1/3 flex-col justify-center border-l-2 border-l-gray-700 px-6 shadow-lg shadow-black/30 transition-transform duration-300 dark:bg-gray-900 ${
           sideMenuIsVisible ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
