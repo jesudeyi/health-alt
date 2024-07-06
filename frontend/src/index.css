@@ -6,29 +6,20 @@ body {
   scroll-behavior: smooth;
 }
 
-body::-webkit-scrollbar,
-.response-container::-webkit-scrollbar {
+*::-webkit-scrollbar {
   width: 0.3rem;
-}
-
-html body::-webkit-scrollbar-track,
-html .response-container::-webkit-scrollbar-track {
   background: #e5e7eb;
 }
 
-html.dark body::-webkit-scrollbar-track,
-html.dark .response-container::-webkit-scrollbar-track {
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+html *::-webkit-scrollbar-track {
   background: #1f2937;
 }
 
-html body::-webkit-scrollbar-thumb,
-html .response-container::-webkit-scrollbar-thumb {
-  background: #11867d;
-  border-radius: 20px;
-}
-
-html.dark body::-webkit-scrollbar-thumb,
-html.dark .response-container::-webkit-scrollbar-thumb {
+html *::-webkit-scrollbar-thumb {
   background: #11867d;
   border-radius: 20px;
 }

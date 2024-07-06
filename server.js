@@ -3,20 +3,22 @@ import { fileURLToPath } from "url";
 import path, { dirname } from "path";
 import dotenv from "dotenv";
 import apiRouter from "./api/router.js";
+import connectDB from "./api/config/db.js";
+import { AppConfig } from "./api/config/index.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const initializeExpressServer = async () => {
-    dotenv.config();
-    const port = process.env.PORT;
+    await connectDB();
+    const port = AppConfig.PORT;
 
     const app = express();
     app.use(express.json({ limit: "50mb" }));
     app.use(express.urlencoded({ extended: false, limit: "50mb" }));
 
-    app.use("/api/v1/ai-conversation", apiRouter);
+    app.use("/api/v1", apiRouter);
 
-    if (process.env.NODE_ENV === "production") {
+    if (AppConfig.NODE_ENV === "production") {
         console.log("up here prod");
         app.use(express.static(path.join(__dirname, "frontend/dist")));
 

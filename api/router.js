@@ -1,6 +1,7 @@
 import express from "express";
 import Anthropic from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
+import { Business } from "./model";
 
 const router = express.Router();
 dotenv.config();
@@ -10,7 +11,7 @@ const anthropic = new Anthropic({
     apiKey: process.env.CLAUDE_API_KEY,
 });
 
-router.post("/", async (req, res) => {
+router.post("/ai-conversation", async (req, res) => {
     const systemMessage = `INTRO:
 The primary input from users is their health info (details later) and the meal/junk input (the name or image). We need to do the following:
 
@@ -89,6 +90,64 @@ Allergies, dietaryPreference, healthConditions and lifeStage being comma separat
     } catch (error) {
         console.error("Unable to converse with AI: ", error);
         res.status(500).json({ error: "Unable to converse with AI" });
+    }
+});
+
+// Implement business creation route
+router.post("/businesses", async (req, res) => {
+    try {
+        // Create a new business
+        const business = await Business.create(req.body);
+
+        // Return the created business to the client
+        res.status(201).json(business);
+    } catch (error) {
+        console.error("Unable to create business: ", error);
+        res.status(500).json({ error: "Unable to create business" });
+    }
+});
+
+// Implement get business route - get by regNumber if present in query
+router.get("/businesses", async (req, res) => {
+    try {
+        const { regNumber } = req.query;
+
+        if (regNumber) {
+            // Get business by regNumber
+            const business = await Business.findOne({ regNumber });
+
+            // Return the business to the client
+            res.status(200).json(business);
+        } else {
+            // Get all businesses
+            const businesses = await Business.find();
+
+            // Return the businesses to the client
+            res.status(200).json(businesses);
+        }
+    } catch (error) {
+        console.error("Unable to get businesses: ", error);
+        res.status(500).json({ error: "Unable to get businesses" });
+    }
+});
+
+// Implement update business route by id in params
+router.put("/businesses/:id", async (req, res) => {
+    try {
+        const { businessId } = req.params;
+        const { updatedFields } = req.body;
+
+        // Update business by id
+        const business = await Business.findByIdAndUpdate(
+            businessId,
+            { $set: updatedFields },
+            {
+                new: true,
+            }
+        );
+    } catch (error) {
+        console.error("Unable to update business: ", error);
+        res.status(500).json({ error: "Unable to update business" });
     }
 });
 

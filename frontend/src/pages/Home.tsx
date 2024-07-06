@@ -16,8 +16,10 @@ import {
   FaChevronDown,
   FaChevronRight
 } from 'react-icons/fa6'
+import AppButton from 'components/AppButton'
 import localData from 'cache'
 import { capitalizeString, isMobile } from 'utils'
+import Header from 'components/Header'
 interface FormData {
   allergies: string
   dietGoal: string
@@ -392,24 +394,25 @@ const Home = () => {
   }
 
   return (
-    <div className="relative flex flex-col items-start justify-center">
+    <main className="relative flex flex-col items-start justify-center">
       <div
         className={`my-auto ${
           sideMenuIsVisible ? 'md:w-2/3' : 'w-full'
         } flex-col items-center justify-center transition-[width] ease-in-out`}
       >
         {/* A. Topmost section */}
-        <div className="mb-12 flex items-center justify-start px-4 md:justify-center">
+        <div className="mb-12">
           {/* Logo */}
-          <div className="mt-2 md:flex-1 md:text-center">
-            <h1 className="font-[cursive] text-4xl font-medium tracking-wider">
-              <span>health</span>
-              <span className="text-teal-500">ALT</span>
-            </h1>
+          <div className="mt-1">
+            <Header
+              navContainerCustomStyles={` ${
+                sideMenuIsVisible ? 'md:w-[70%' : ''
+              }`}
+            />
           </div>
 
           {!sideMenuIsVisible && (
-            <div className="absolute right-0 top-2 flex items-center space-x-4">
+            <div className="absolute right-0 top-[14px] flex items-center space-x-4">
               <button
                 onClick={() => setSideMenuIsVisible(true)}
                 className="rounded-full p-2 transition-colors ease-in-out hover:bg-gray-800 dark:bg-teal-500 dark:hover:bg-teal-600"
@@ -473,7 +476,7 @@ const Home = () => {
             )}
             <div className="absolute right-4 top-1/2 flex -translate-y-1/2 space-x-2">
               <label
-                className={`rounded-lg border px-3 py-2 dark:border-teal-900/80 dark:bg-gray-900 ${
+                className={`rounded-lg border px-3 py-3 dark:border-teal-900/80 dark:bg-gray-900 ${
                   isFetchingResponse
                     ? 'cursor-not-allowed opacity-50'
                     : 'cursor-pointer'
@@ -491,25 +494,13 @@ const Home = () => {
                   onChange={handleFileChange}
                 />
               </label>
-              <button
-                disabled={isFetchingResponse}
+              <AppButton
+                buttonText="healthALT"
                 onClick={startConversationWithAI}
-                className={`flex items-center rounded-lg bg-teal-700 p-2 text-white transition-colors ease-in-out md:px-3 dark:bg-teal-500 dark:hover:bg-teal-600 ${
-                  isFetchingResponse ? 'opacity-70' : ''
-                }`}
-              >
-                <span className="mt-0.5 hidden md:block">healthALT</span>
-                {isFetchingResponse ? (
-                  <ClipLoader
-                    color={'#FFF'}
-                    loading={isFetchingResponse}
-                    size={18}
-                    className="md:ml-2"
-                  />
-                ) : (
-                  <IoSendSharp size={18} className="ml-1 md:ml-2" />
-                )}
-              </button>
+                disabled={isFetchingResponse}
+                isLoading={isFetchingResponse}
+                icon={<IoSendSharp size={18} />}
+              />
             </div>
           </div>
 
@@ -776,7 +767,7 @@ const Home = () => {
           sideMenuIsVisible ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="mt-4 flex justify-end">
+        <div className="flex justify-end">
           <button
             onClick={() => setSideMenuIsVisible(false)}
             className="rounded-full p-2 transition-colors ease-in-out dark:hover:bg-gray-800"
@@ -947,7 +938,7 @@ const Home = () => {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   )
 }
 
