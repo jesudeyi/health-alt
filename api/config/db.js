@@ -4,6 +4,7 @@ import { AppConfig } from "./index.js";
 
 const connectDB = async () => {
     try {
+        console.log("URI: ", AppConfig.MONGODB_URI);
         const conn = await connect(AppConfig.MONGODB_URI);
 
         console.log(

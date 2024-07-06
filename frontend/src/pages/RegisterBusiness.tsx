@@ -142,20 +142,17 @@ const RegisterBusiness = () => {
     console.log(formData)
   }
 
-  const downloadQRCode = async () => {
+  const downloadQRCode = () => {
     setIsDownloadingQRCode(true)
 
-    // if (QRCodeDownloadRef.current) {
     const link = document.createElement('a')
-    link.download = `${registeredBusiness?.name}-qrcode.png`
-    const canvas = document.querySelector('.qr-code-container canvas')
 
-    if (canvas) {
-      console.log('CANVAS: ', canvas)
-      link.download = `${registeredBusiness?.name}-qrcode.png`
-      await link.click()
-    }
-    // }
+    link.href = '/images/iya-moria-qrcode.png'
+    link.download = 'iya-moria-qrcode.png'
+    document.body.appendChild(link)
+    link.click()
+
+    document.body.removeChild(link)
 
     setIsDownloadingQRCode(false)
   }
