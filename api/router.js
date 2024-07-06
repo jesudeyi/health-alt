@@ -1,7 +1,7 @@
 import express from "express";
 import Anthropic from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
-import { Business } from "./model";
+import { Business } from "./model.js";
 
 const router = express.Router();
 dotenv.config();
